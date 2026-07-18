@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Prompt history{% endblock %}
+{% block tagline %}Every prompt you've generated, in one place.{% endblock %}
+
+{% block content %}
+
+<div class="history-page-header">
+  <div>
+    <h1>Prompt history</h1>
+    <p>These are the prompts you've copied or downloaded from the builder.</p>
+  </div>
+  <button type="button" id="page-clear-history-btn" class="btn btn-danger-outline btn-sm">Clear all</button>
+</div>
+
+<ul id="page-history-list" class="history-page-list" aria-live="polite">
+  <li class="history-page-skeleton" aria-hidden="true"></li>
+  <li class="history-page-skeleton" aria-hidden="true"></li>
+</ul>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/history_page.js') }}"></script>
+{% endblock %}

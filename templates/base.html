@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Logo Prompt Builder{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    {% block css %}{% endblock %}
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="{{ session.get('user_id') and url_for('dashboard') or url_for('login') }}" class="mark" aria-label="Logo Prompt Builder home">
+      <svg viewBox="0 0 60 60" width="42" height="42">
+        <circle cx="30" cy="30" r="27" fill="none" stroke="var(--accent-amber)" stroke-width="2"/>
+        <circle cx="30" cy="30" r="21" fill="none" stroke="var(--ink)" stroke-width="1.5"/>
+        <path d="M18 34 Q30 24 42 34" fill="none" stroke="var(--accent-teal)" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M30 34 L30 18" stroke="var(--accent-coral)" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </a>
+    <div class="header-text">
+      <h1>Logo Prompt Builder</h1>
+      <p class="tagline">{% block tagline %}Turn a business brief into a print-ready AI logo prompt.{% endblock %}</p>
+    </div>
+
+    <nav class="site-nav" aria-label="Main">
+      {% if session.get('user_id') %}
+        <span class="nav-user">{{ session.user_name }}</span>
+        <a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a>
+        <a href="{{ url_for('logout') }}" class="nav-link nav-link-ghost">Log out</a>
+      {% else %}
+        <a href="{{ url_for('login') }}" class="nav-link nav-link-ghost">Log in</a>
+        <a href="{{ url_for('register') }}" class="nav-link nav-link-primary">Register</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-stack">
+        {% for category, message in messages %}
+            <div class="flash flash-{{ category }}" role="status">
+                <span class="flash-message">{{ message }}</span>
+                <button type="button" class="flash-dismiss" aria-label="Dismiss">&times;</button>
+            </div>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<main class="page-shell">
+{% block content %}
+
+{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <p>Logo Prompt Builder &mdash; fill in a ticket, get a print-ready prompt for your next AI logo generation.</p>
+</footer>
+
+<script src="{{ url_for('static', filename='js/base.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

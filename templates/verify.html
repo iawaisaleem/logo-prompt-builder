@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Verify email{% endblock %}
+{% block tagline %}Check your inbox for the 6-digit code we just sent.{% endblock %}
+
+{% block content %}
+
+<div class="auth-shell">
+  <div class="auth-card">
+    <span class="auth-eyebrow">One more step</span>
+    <h1>Verify your email</h1>
+    <p class="auth-subtitle">Enter the email you registered with and the 6-digit code we sent to it.</p>
+
+    <form method="POST">
+
+        <div class="field">
+            <label for="verify-email">Email</label>
+            <input type="email" id="verify-email" name="email" placeholder="you@example.com" autocomplete="email" required>
+        </div>
+
+        <div class="field">
+            <label for="verify-otp">Verification code</label>
+            <input type="text" id="verify-otp" name="otp" class="otp-input" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="000000" autocomplete="one-time-code" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary auth-submit">
+            Verify email
+        </button>
+
+    </form>
+
+    <hr class="auth-divider">
+
+    <p class="auth-foot">
+      Already verified? <a href="{{ url_for('login') }}">Log in</a>
+    </p>
+    <p class="auth-foot">
+      No account yet? <a href="{{ url_for('register') }}">Register</a>
+    </p>
+  </div>
+</div>
+
+{% endblock %}

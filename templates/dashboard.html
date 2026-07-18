@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block tagline %}Your workspace for building and revisiting logo prompts.{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-intro">
+  <span class="dashboard-eyebrow">Dashboard</span>
+  <h1>Welcome back, {{ session.user_name }}</h1>
+  <p>You're logged in as {{ session.user_email }}. Pick up where you left off, or start a fresh ticket.</p>
+</div>
+
+<div class="dashboard-grid">
+
+  <a href="{{ url_for('prompt_builder') }}" class="dashboard-card">
+    <span class="dashboard-card-icon" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M4 19V5a2 2 0 0 1 2-2h8l6 6v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" stroke="var(--accent-teal)" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M14 3v6h6" stroke="var(--accent-teal)" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M8 13h8M8 16.5h5" stroke="var(--accent-teal)" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <h2>Logo Prompt Builder</h2>
+    <p>Fill in a ticket &mdash; business name, category, style, and palette &mdash; and get a print-ready AI logo prompt.</p>
+    <span class="dashboard-card-cta">Open the builder &rarr;</span>
+  </a>
+
+  <a href="{{ url_for('history') }}" class="dashboard-card">
+    <span class="dashboard-card-icon" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M12 7v5l3.5 2" stroke="var(--accent-amber)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="12" cy="12" r="8.5" stroke="var(--accent-amber)" stroke-width="1.6"/>
+      </svg>
+    </span>
+    <h2>Prompt History</h2>
+    <p>Browse every prompt you've generated, copy an old one back out, or clear your history.</p>
+    <span class="dashboard-card-cta">View history &rarr;</span>
+  </a>
+
+</div>
+
+{% endblock %}

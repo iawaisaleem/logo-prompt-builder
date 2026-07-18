@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+{% block tagline %}Create an account to start building logo prompts.{% endblock %}
+
+{% block content %}
+
+<div class="auth-shell">
+  <div class="auth-card">
+    <span class="auth-eyebrow">New here</span>
+    <h1>Create your account</h1>
+    <p class="auth-subtitle">We'll email you a verification code before your first login.</p>
+
+    <form action="{{ url_for('register') }}" method="POST" novalidate>
+
+        <div class="field">
+            <label for="register-name">Name</label>
+            <input type="text" id="register-name" name="name" placeholder="e.g. Amina Sulehri" autocomplete="name" required>
+        </div>
+
+        <div class="field">
+            <label for="register-email">Email</label>
+            <input type="email" id="register-email" name="email" placeholder="you@example.com" autocomplete="email" required>
+        </div>
+
+        <div class="field">
+            <label for="register-password">Password</label>
+            <div class="password-field">
+                <input type="password" id="register-password" name="password" placeholder="At least 8 characters" autocomplete="new-password" minlength="8" required>
+                <button type="button" class="password-toggle" data-toggle-for="register-password">Show</button>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary auth-submit">
+            Create account
+        </button>
+
+    </form>
+
+    <hr class="auth-divider">
+
+    <p class="auth-foot">
+      Already have an account? <a href="{{ url_for('login') }}">Log in</a>
+    </p>
+  </div>
+</div>
+
+{% endblock %}
