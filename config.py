@@ -7,12 +7,16 @@ class Config:
     SECRET_KEY = os.getenv("SECRET_KEY")
 
     # MySQL
-    MYSQL_HOST = os.getenv("MYSQL_HOST")
-    MYSQL_PORT = int(os.getenv("MYSQL_PORT", 3306))
-    MYSQL_USER = os.getenv("MYSQL_USER")
-    MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-    MYSQL_DB = os.getenv("MYSQL_DB")
+    SQLALCHEMY_DATABASE_URI = (
+    f"mysql+pymysql://"
+    f"{os.getenv('MYSQL_USER')}:"
+    f"{os.getenv('MYSQL_PASSWORD')}@"
+    f"{os.getenv('MYSQL_HOST')}:"
+    f"{os.getenv('MYSQL_PORT',3306)}/"
+    f"{os.getenv('MYSQL_DB')}"
+)
 
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     # Mail
     MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
     MAIL_PORT = int(os.getenv("MAIL_PORT", 587))

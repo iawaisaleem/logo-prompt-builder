@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from config import Config
-from database import mysql
+from database import db
 from flask import session
+from sqlalchemy import text
 from flask_mail import Mail
+from flask import jsonify
 from email_service import mail
 from otp_service import generate_otp, get_otp_expiry
 from email_service import send_otp_email 
@@ -11,8 +13,10 @@ import bcrypt
 app = Flask(__name__)
 app.config.from_object(Config)
 
-mysql.init_app(app)
+db.init_app(app)
 mail.init_app(app)
+with app.app_context():
+    db.create_all()
 
 
 @app.route("/prompt-builder")
@@ -27,24 +31,26 @@ def prompt_builder():
 def save_prompt():
 
     if "user_id" not in session:
-        return {"success": False}
+        return jsonify(success=True)
 
     prompt = request.form["prompt"]
 
-    cursor = mysql.connection.cursor()
+    connection = db.session
 
-    cursor.execute("""
-        INSERT INTO prompts(user_id,prompt)
-        VALUES(%s,%s)
-    """, (
-        session["user_id"],
-        prompt
-    ))
+    connection.execute(
+    text("""
+        INSERT INTO prompts(user_id, prompt)
+        VALUES (:user_id, :prompt)
+    """),
+    {
+        "user_id": session["user_id"],
+        "prompt": prompt
+    }
+)
 
-    mysql.connection.commit()
-    cursor.close()
+    connection.commit()
 
-    return {"success": True}
+    return jsonify(success=True)
 
 @app.route("/get-prompts")
 def get_prompts():
@@ -52,21 +58,22 @@ def get_prompts():
     if "user_id" not in session:
         return []
 
-    cursor=mysql.connection.cursor()
+    connection = db.session
 
-    cursor.execute("""
-        SELECT
-            id,
-            prompt,
-            created_at
+    result = connection.execute(
+    text("""
+        SELECT id, prompt, created_at
         FROM prompts
-        WHERE user_id=%s
+        WHERE user_id=:user_id
         ORDER BY created_at DESC
-    """,(session["user_id"],))
+    """),
+    {
+        "user_id": session["user_id"]
+    }
+)
 
-    rows=cursor.fetchall()
+    rows = result.fetchall()
 
-    cursor.close()
 
     prompts=[]
 
@@ -81,29 +88,29 @@ def get_prompts():
 
         })
 
-    return prompts
+    return jsonify(prompts)
 
 @app.route("/clear-prompts", methods=["POST"])
 def clear_prompts():
 
     if "user_id" not in session:
-        return {"success":False}
+        return jsonify(success=False)
 
-    cursor=mysql.connection.cursor()
+    connection = db.session
 
-    cursor.execute("""
-
+    connection.execute(
+    text("""
         DELETE FROM prompts
+        WHERE user_id=:user_id
+    """),
+    {
+        "user_id": session["user_id"]
+    }
+)
 
-        WHERE user_id=%s
+    connection.commit()
 
-    """,(session["user_id"],))
-
-    mysql.connection.commit()
-
-    cursor.close()
-
-    return {"success":True}
+    return jsonify(success=True)
 
 @app.route("/history")
 def history():
@@ -126,18 +133,20 @@ def register():
         email = request.form["email"].strip().lower()
         password = request.form["password"]
 
-        cursor = mysql.connection.cursor()
+        connection = db.session
 
         # Check if email already exists
-        cursor.execute(
-            "SELECT id FROM users WHERE email=%s",
-            (email,)
-        )
+        result = connection.execute(
+    text("SELECT id FROM users WHERE email=:email"),
+    {
+        "email": email
+    }
+)
 
-        existing_user = cursor.fetchone()
+        existing_user = result.fetchone()
 
         if existing_user:
-            cursor.close()
+            connection.close()
             flash("Email already exists.", "danger")
             return redirect(url_for("register"))
 
@@ -152,20 +161,23 @@ def register():
         otp_expiry = get_otp_expiry()
 
         # Save user with OTP
-        cursor.execute("""
+        connection.execute(
+    text("""
         INSERT INTO users
-        (name, email, password, otp, otp_expiry)
-        VALUES(%s, %s, %s, %s, %s)
-        """, (
-        name,
-        email,
-        hashed_password,
-        otp,
-        otp_expiry
-        ))
+        (name,email,password,otp,otp_expiry)
+        VALUES
+        (:name,:email,:password,:otp,:expiry)
+    """),
+    {
+        "name": name,
+        "email": email,
+        "password": hashed_password,
+        "otp": otp,
+        "expiry": otp_expiry
+    }
+)
 
-        mysql.connection.commit()
-        cursor.close()
+        connection.commit()
 
         # Send OTP email
         send_otp_email(app, email, otp)
@@ -184,18 +196,22 @@ def verify():
         email = request.form["email"].strip().lower()
         otp = request.form["otp"].strip()
 
-        cursor = mysql.connection.cursor()
+        connection = db.session
 
-        cursor.execute("""
-            SELECT otp, otp_expiry
-            FROM users
-            WHERE email=%s
-        """, (email,))
+        result = connection.execute(
+    text("""
+        SELECT otp, otp_expiry
+        FROM users
+        WHERE email=:email
+    """),
+    {
+        "email": email
+    }
+)
 
-        user = cursor.fetchone()
+        user = result.fetchone()
 
         if not user:
-            cursor.close()
             flash("User not found.", "danger")
             return redirect(url_for("verify"))
 
@@ -205,25 +221,28 @@ def verify():
         from datetime import datetime
 
         if datetime.now() > expiry:
-            cursor.close()
             flash("OTP has expired.", "danger")
             return redirect(url_for("verify"))
 
         if otp != saved_otp:
-            cursor.close()
+            connection.close()
             flash("Invalid OTP.", "danger")
             return redirect(url_for("verify"))
 
-        cursor.execute("""
-            UPDATE users
-            SET is_verified=1,
-                otp=NULL,
-                otp_expiry=NULL
-            WHERE email=%s
-        """, (email,))
+        connection.execute(
+    text("""
+        UPDATE users
+        SET is_verified=1,
+            otp=NULL,
+            otp_expiry=NULL
+        WHERE email=:email
+    """),
+    {
+        "email": email
+    }
+)
 
-        mysql.connection.commit()
-        cursor.close()
+        connection.commit()
 
         flash("Email verified successfully! Please log in.", "success")
         return redirect(url_for("login"))
@@ -238,16 +257,20 @@ def login():
         email = request.form["email"].strip().lower()
         password = request.form["password"]
 
-        cursor = mysql.connection.cursor()
+        connection = db.session
 
-        cursor.execute("""
-            SELECT id, name, email, password, is_verified
-            FROM users
-            WHERE email=%s
-        """, (email,))
+        result = connection.execute(
+    text("""
+        SELECT id, name, email, password, is_verified
+        FROM users
+        WHERE email=:email
+    """),
+    {
+        "email": email
+    }
+)
 
-        user = cursor.fetchone()
-        cursor.close()
+        user = result.fetchone()
 
         if user is None:
             flash("Invalid email or password.", "danger")
