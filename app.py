@@ -12,6 +12,7 @@ import bcrypt
 
 app = Flask(__name__)
 app.config.from_object(Config)
+print("Flask SECRET_KEY =", app.config.get("SECRET_KEY"))
 import os
 
 print("HOST =", os.getenv("MYSQLHOST"))

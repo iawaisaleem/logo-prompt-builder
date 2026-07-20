@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+print("SECRET_KEY =", os.getenv("SECRET_KEY"))
 print("MYSQLHOST =", os.getenv("MYSQLHOST"))
 print("MYSQLPORT =", os.getenv("MYSQLPORT"))
 print("MYSQLUSER =", os.getenv("MYSQLUSER"))
