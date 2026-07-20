@@ -3,9 +3,7 @@ from config import Config
 from database import db
 from flask import session
 from sqlalchemy import text
-from flask_mail import Mail
 from flask import jsonify
-from email_service import mail
 from otp_service import generate_otp, get_otp_expiry
 from email_service import send_otp_email 
 import bcrypt
@@ -21,7 +19,6 @@ print("DB =", os.getenv("MYSQLDATABASE"))
 print("PORT =", os.getenv("MYSQLPORT"))
 
 db.init_app(app)
-mail.init_app(app)
 with app.app_context():
     db.create_all()
 
