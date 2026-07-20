@@ -14,10 +14,10 @@ app = Flask(__name__)
 app.config.from_object(Config)
 import os
 
-print("HOST =", os.getenv("MYSQL_HOST"))
-print("USER =", os.getenv("MYSQL_USER"))
-print("DB =", os.getenv("MYSQL_DB"))
-print("PORT =", os.getenv("MYSQL_PORT"))
+print("HOST =", os.getenv("MYSQLHOST"))
+print("USER =", os.getenv("MYSQLUSER"))
+print("DB =", os.getenv("MYSQLDATABASE"))
+print("PORT =", os.getenv("MYSQLPORT"))
 
 db.init_app(app)
 mail.init_app(app)
